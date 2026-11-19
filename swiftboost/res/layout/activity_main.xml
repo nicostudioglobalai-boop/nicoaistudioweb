@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginLeft="20dp"
+        android:text="SwiftBoost"
+        android:textColor="@color/text_primary"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="2dp"
+        android:text="Speed &amp; Battery, no root needed"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:orientation="horizontal"
+        android:background="@drawable/card_bg">
+
+        <TextView android:id="@+id/tab0"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="12dp"
+            android:text="@string/tab_dashboard" android:textColor="@color/bg"
+            android:textStyle="bold" android:background="@drawable/btn_accent" />
+
+        <TextView android:id="@+id/tab1"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="12dp"
+            android:text="@string/tab_boost" android:textColor="@color/text_secondary" />
+
+        <TextView android:id="@+id/tab2"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="12dp"
+            android:text="@string/tab_tips" android:textColor="@color/text_secondary" />
+    </LinearLayout>
+
+    <ViewFlipper android:id="@+id/flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- TAB 0 : Dashboard -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Battery" />
+                    <TextView android:id="@+id/batteryPct"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="--" android:textColor="@color/accent_green"
+                        android:textSize="48sp" android:textStyle="bold" />
+                    <ProgressBar style="?android:attr/progressBarStyleHorizontal"
+                        android:id="@+id/batteryBar" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+                    <TextView android:id="@+id/batteryDetail"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="12dp">
+                        <Button android:id="@+id/btnSaver"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Battery Saver" android:textColor="@color/bg"
+                            android:background="@drawable/btn_accent" android:layout_marginRight="6dp"
+                            android:textAllCaps="false" />
+                        <Button android:id="@+id/btnBattOpt"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Restrict apps" android:textColor="@color/accent"
+                            android:background="@drawable/btn_outline" android:layout_marginLeft="6dp"
+                            android:textAllCaps="false" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Memory (RAM)" />
+                    <ProgressBar style="?android:attr/progressBarStyleHorizontal"
+                        android:id="@+id/ramBar" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView android:id="@+id/ramText"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Storage" />
+                    <ProgressBar style="?android:attr/progressBarStyleHorizontal"
+                        android:id="@+id/storageBar" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView android:id="@+id/storageText"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Device" />
+                    <TextView android:id="@+id/deviceText"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- TAB 1 : Boost -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="One-Tap RAM Boost" />
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Closes background apps that are slowing your phone and draining the battery."
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                    <Button android:id="@+id/btnBoost"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="BOOST NOW" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                    <TextView android:id="@+id/boostStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/accent_green"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Animation Speed (Turbo)" />
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Shorter system animations make the whole phone feel 2x faster and save battery."
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                    <TextView android:id="@+id/animCurrent"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/text_primary"
+                        android:textSize="13sp" android:textStyle="bold" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="10dp">
+                        <Button android:id="@+id/anim100"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="1x" android:textColor="@color/accent"
+                            android:background="@drawable/btn_outline" android:layout_margin="3dp"
+                            android:textAllCaps="false" />
+                        <Button android:id="@+id/anim50"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="0.5x" android:textColor="@color/bg" android:layout_margin="3dp"
+                            android:background="@drawable/btn_accent" android:textAllCaps="false" />
+                        <Button android:id="@+id/anim25"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="0.25x" android:textColor="@color/accent"
+                            android:background="@drawable/btn_outline" android:layout_margin="3dp"
+                            android:textAllCaps="false" />
+                        <Button android:id="@+id/anim0"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Off" android:textColor="@color/accent"
+                            android:background="@drawable/btn_outline" android:layout_margin="3dp"
+                            android:textAllCaps="false" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Unlock Turbo Mode (one time)" />
+                    <TextView android:id="@+id/permStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:text="Animation control needs a one-time permission that Android only allows over ADB (a computer tweak, no root)." />
+                    <TextView android:id="@+id/adbCmd"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" android:padding="10dp"
+                        android:background="@color/bg"
+                        android:fontFamily="monospace" android:textIsSelectable="true"
+                        android:textColor="@color/accent_green" android:textSize="12sp" />
+                    <Button android:id="@+id/btnCopy"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Copy ADB command" android:textColor="@color/accent"
+                        android:background="@drawable/btn_outline" android:textAllCaps="false" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- TAB 2 : Tips -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout android:id="@+id/tipsList"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp" />
+        </ScrollView>
+    </ViewFlipper>
+</LinearLayout>

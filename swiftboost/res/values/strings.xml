@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SwiftBoost</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_boost">Boost</string>
+    <string name="tab_tips">Tips</string>
+</resources>
