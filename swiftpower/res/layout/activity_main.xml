@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginLeft="20dp"
+        android:text="SwiftPower"
+        android:textColor="@color/text_primary"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="2dp"
+        android:text="Powers ordinary phones don't have"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal">
+
+        <TextView android:id="@+id/tab0"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="10dp"
+            android:text="@string/tab_power" android:textColor="@color/bg"
+            android:textStyle="bold" android:background="@drawable/btn_accent" android:layout_margin="3dp" />
+
+        <TextView android:id="@+id/tab1"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="10dp"
+            android:text="@string/tab_battery" android:textColor="@color/text_secondary" android:layout_margin="3dp" />
+
+        <TextView android:id="@+id/tab2"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="10dp"
+            android:text="@string/tab_storage" android:textColor="@color/text_secondary" android:layout_margin="3dp" />
+
+        <TextView android:id="@+id/tab3"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:padding="10dp"
+            android:text="@string/tab_network" android:textColor="@color/text_secondary" android:layout_margin="3dp" />
+    </LinearLayout>
+
+    <ViewFlipper android:id="@+id/flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- TAB 0: Power / tile + boost -->
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="⚡ Boost Tile (in your notification shade)" />
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Add a Swift Boost button to the pull-down shade — boost from ANY screen or any app, even with the screen in your pocket logic. Most phones never have this."
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                    <Button android:id="@+id/btnOpenTiles"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="OPEN SHADE TILE SETTINGS" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="In settings, drag 'Swift Boost' into your active tiles. Then: pull the shade down and tap it anytime."
+                        android:textColor="@color/text_secondary" android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Boost now" />
+                    <Button android:id="@+id/btnBoost"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="BOOST NOW" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                    <TextView android:id="@+id/boostStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/accent_green"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- TAB 1: Battery doctor -->
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Charging Doctor" />
+                    <TextView android:id="@+id/battLine"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary" android:textSize="15sp" android:textStyle="bold" />
+                    <TextView android:id="@+id/battSub"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp" android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="12dp">
+                        <Button android:id="@+id/btnGuardStart"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Start guard" android:textColor="@color/bg"
+                            android:background="@drawable/btn_accent" android:layout_marginRight="6dp"
+                            android:textAllCaps="false" />
+                        <Button android:id="@+id/btnGuardStop"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="Stop guard" android:textColor="@color/accent"
+                            android:background="@drawable/btn_outline" android:layout_marginLeft="6dp"
+                            android:textAllCaps="false" />
+                    </LinearLayout>
+                    <TextView android:id="@+id/guardStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Alerts the guard gives you" />
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="• Slow-charger warn when charging speed is weak\n• Overheat warn above 40°C (battery killer)\n• Unplug reminder at 80% and full\n• Unplugged notice (stops itself)"
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- TAB 2: Storage radar -->
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Storage Radar — the space eaters" />
+                    <TextView android:id="@+id/storageSummary"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:text="Finds the biggest photos and videos on your phone so you decide what to clear — tap an item to open and delete it." />
+                    <Button android:id="@+id/btnScan"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="SCAN BIGGEST FILES" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout style="@style/Card">
+                    <LinearLayout android:id="@+id/mediaList"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- TAB 3: Network doctor -->
+        <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Network Doctor" />
+                    <TextView android:id="@+id/netInfo"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary" android:textSize="13sp"
+                        android:text="Wi-Fi / mobile type, signal, and link speed shown live. Run the check to test ping, DNS, and true download speed — so you know if slow loading is the network or the phone." />
+                    <Button android:id="@+id/btnNetTest"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="RUN NETWORK CHECK" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                    <TextView android:id="@+id/netResult"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </ViewFlipper>
+</LinearLayout>

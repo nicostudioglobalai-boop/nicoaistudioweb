@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SwiftPower</string>
+    <string name="tab_power">Power</string>
+    <string name="tab_battery">Battery</string>
+    <string name="tab_storage">Storage</string>
+    <string name="tab_network">Network</string>
+</resources>
