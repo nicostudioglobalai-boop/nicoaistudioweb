@@ -59,8 +59,8 @@ fi
 java -jar "$BT/lib/apksigner.jar" sign \
   --ks "$KS" --ks-key-alias swiftcut \
   --ks-pass pass:swiftcut123 --key-pass pass:swiftcut123 \
-  --out "$PROJ/SwiftCut-v1.1.apk" "$OUT/aligned.apk"
+  --out "$PROJ/SwiftCut-v1.2.apk" "$OUT/aligned.apk"
 
 echo "verify:"
-java -jar "$BT/lib/apksigner.jar" verify --print-certs "$PROJ/SwiftCut-v1.1.apk" | head -2
-ls -la "$PROJ/SwiftCut-v1.1.apk"
+java -jar "$BT/lib/apksigner.jar" verify --print-certs "$PROJ/SwiftCut-v1.2.apk" | head -2
+ls -la "$PROJ/SwiftCut-v1.2.apk"

@@ -139,6 +139,20 @@ public class MainActivity extends Activity {
             return true;
         }));
 
+        findViewById(R.id.btnFast).setOnClickListener(v -> runIfLoaded(() -> {
+            runJob("Making 2x faster.", out -> Speed.convert(MainActivity.this, videoUri,
+                    2.0, out, jobProgress()), "fast",
+                    outName(videoName, "fast", false));
+            return true;
+        }));
+
+        findViewById(R.id.btnSlow).setOnClickListener(v -> runIfLoaded(() -> {
+            runJob("Making slow motion.", out -> Speed.convert(MainActivity.this, videoUri,
+                    0.5, out, jobProgress()), "slow",
+                    outName(videoName, "slow", false));
+            return true;
+        }));
+
         btnCompress.setOnClickListener(v -> runIfLoaded(() -> {
             runJob("Compressing.", out -> Compressor.compress(MainActivity.this, videoUri,
                     900000, out, jobProgress()), "small",
@@ -270,8 +284,11 @@ public class MainActivity extends Activity {
     }
 
     private File tmp(String tag) {
-        return new File(getExternalFilesDir(null),
-                "sw_" + tag + "_" + stamp() + ".mp4");
+        File base = getExternalFilesDir(null);
+        if (base == null) base = getFilesDir();
+        File dir = new File(base, "work");
+        dir.mkdirs();
+        return new File(dir, "sw_" + tag + "_" + stamp() + ".mp4");
     }
 
     private static String stamp() {
@@ -399,6 +416,10 @@ public class MainActivity extends Activity {
             timeline.setRange(0, durationMs);
             timeline.setPlayhead(0);
             preview.stopPlayback();
+            preview.setOnErrorListener((mp, what, extra) -> {
+                setStatus("Preview can't play this format; trimming still works");
+                return true;
+            });
             preview.setVideoURI(videoUri);
             preview.seekTo(0);
         } catch (Exception ex) {
