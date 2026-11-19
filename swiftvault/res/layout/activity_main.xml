@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+
+            <LinearLayout style="@style/Card">
+                <TextView style="@style/CardTitle" android:text="Storage meters" />
+                <LinearLayout android:id="@+id/meters"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/Card">
+                <TextView style="@style/CardTitle" android:text="Offload space eaters to SD card" />
+                <TextView
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Tick the big files below, choose your SD card folder once, and SwiftVault moves them off internal memory. Internal space is what keeps the phone fast - Android crawls when it is nearly full."
+                    android:textColor="@color/text_secondary" android:textSize="13sp" />
+                <Button android:id="@+id/btnPickDest"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="1. CHOOSE SD CARD FOLDER" android:textColor="@color/accent"
+                    android:background="@drawable/btn_outline" android:textAllCaps="false" />
+                <Button android:id="@+id/btnScan"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="2. SCAN BIGGEST FILES" android:textColor="@color/bg"
+                    android:background="@drawable/btn_accent" android:textAllCaps="false"
+                    android:textStyle="bold" />
+                <Button android:id="@+id/btnMove"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="3. MOVE TICKED FILES TO SD" android:textColor="@color/bg"
+                    android:background="@drawable/btn_accent" android:textAllCaps="false"
+                    android:textStyle="bold" />
+                <TextView android:id="@+id/status"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp" android:textColor="@color/accent_green"
+                    android:textSize="13sp" />
+                <LinearLayout android:id="@+id/fileList"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:layout_marginTop="6dp" />
+            </LinearLayout>
+
+            <LinearLayout style="@style/Card">
+                <TextView style="@style/CardTitle" android:text="Keeping your projects safe" />
+                <TextView
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Photos, screenshots and videos: this app pushes them to the SD card.\nReceipts, PDFs, documents in Downloads: Files app > Downloads > select > Move > SD card.\nOn your PC: run SwiftVault-PC.jar (same download) - it sorts project folders, zips old files, and finds duplicates so the PC never piles up either."
+                    android:textColor="@color/text_secondary" android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
