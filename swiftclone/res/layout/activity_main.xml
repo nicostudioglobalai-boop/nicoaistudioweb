@@ -63,10 +63,24 @@
                 android:orientation="vertical" android:padding="16dp">
 
                 <LinearLayout style="@style/Card">
-                    <TextView style="@style/CardTitle" android:text="Why one-time setup?" />
+                    <TextView style="@style/CardTitle" android:text="⭐ Set up WITHOUT a computer (try this first)" />
                     <TextView
                         android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Android locks real app cloning behind a device-manager permission so no random app can duplicate your apps. Grant it once with a free computer tool (ADB) — no root, no unlocking. iPhone users have the same system restriction."
+                        android:text="Uses Android's official work-profile wizard — no ADB, no LADB, no computer. If your phone supports it, this is all you need."
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                    <Button android:id="@+id/btnProvision"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="ONE-TAP SETUP (NO COMPUTER)" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Why some setup is needed" />
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Android locks real app cloning behind a device-manager permission so no random app can duplicate your apps — same restriction on iPhone. If the one-tap wizard fails on your phone, grant it once with the command below (LADB on-phone or a computer) — no root."
                         android:textColor="@color/text_secondary" android:textSize="13sp" />
                 </LinearLayout>
 

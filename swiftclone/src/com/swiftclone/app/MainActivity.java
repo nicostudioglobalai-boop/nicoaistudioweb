@@ -13,11 +13,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
-import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -27,14 +30,17 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class MainActivity extends Activity {
 
@@ -46,10 +52,14 @@ public class MainActivity extends Activity {
     private TextView spaceStatus, cloneStatus, fastStatus, animCurrent;
     private CheckBox showSystem;
     private LinearLayout appList;
+    private Button btnCreateSpace, btnOpenSpace, btnProvision;
 
     private final List<String> pkgNames = new ArrayList<String>();
-    private final List<String> pkgLabels = new ArrayList<String>();
     private final List<CheckBox> boxes = new ArrayList<CheckBox>();
+
+    private static final int MODE_NONE = 0;
+    private static final int MODE_DEVICE_OWNER = 1;
+    private static final int MODE_PROFILE_OWNER = 2;
 
     private static final String[] ANIM_KEYS = {
             Settings.Global.WINDOW_ANIMATION_SCALE,
@@ -83,9 +93,15 @@ public class MainActivity extends Activity {
         animCurrent = (TextView) findViewById(R.id.animCurrent);
         showSystem = (CheckBox) findViewById(R.id.showSystem);
         appList = (LinearLayout) findViewById(R.id.appList);
+        btnCreateSpace = (Button) findViewById(R.id.btnCreateSpace);
+        btnOpenSpace = (Button) findViewById(R.id.btnOpenSpace);
 
         dpmCmd.setText("adb shell dpm set-device-owner com.swiftclone.app/.AdminReceiver");
         secCmd.setText("adb shell pm grant com.swiftclone.app android.permission.WRITE_SECURE_SETTINGS");
+        btnProvision = (Button) findViewById(R.id.btnProvision);
+        btnProvision.setOnClickListener(new OnClickListener() {
+            @Override public void onClick(View v) { provisionProfile(); }
+        });
 
         showSystem.setOnClickListener(new OnClickListener() {
             @Override public void onClick(View v) { buildAppList(); }
@@ -102,10 +118,10 @@ public class MainActivity extends Activity {
                 try { startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)); } catch (Exception ignored) {}
             }
         });
-        findViewById(R.id.btnCreateSpace).setOnClickListener(new OnClickListener() {
+        btnCreateSpace.setOnClickListener(new OnClickListener() {
             @Override public void onClick(View v) { createSpace(); }
         });
-        findViewById(R.id.btnOpenSpace).setOnClickListener(new OnClickListener() {
+        btnOpenSpace.setOnClickListener(new OnClickListener() {
             @Override public void onClick(View v) { openSpace(); }
         });
         findViewById(R.id.btnClone).setOnClickListener(new OnClickListener() {
@@ -126,6 +142,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        applyMode();
         refreshStatus();
         buildAppList();
         refreshAnimLine(animValue());
@@ -145,38 +162,83 @@ public class MainActivity extends Activity {
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         cm.setPrimaryClip(ClipData.newPlainText("cmd", text));
         if (feedback != null) feedback.setText(msg);
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private boolean isOwner() {
+    private int mode() {
         DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-        try { return dpm.isDeviceOwnerApp(getPackageName()); } catch (Exception e) { return false; }
+        try { if (dpm.isProfileOwnerApp(getPackageName())) return MODE_PROFILE_OWNER; } catch (Exception ignored) {}
+        try { if (dpm.isDeviceOwnerApp(getPackageName())) return MODE_DEVICE_OWNER; } catch (Exception ignored) {}
+        return MODE_NONE;
+    }
+
+    private void applyMode() {
+        int m = mode();
+        btnCreateSpace.setVisibility(m == MODE_DEVICE_OWNER ? View.VISIBLE : View.GONE);
+        btnOpenSpace.setVisibility(m == MODE_DEVICE_OWNER ? View.VISIBLE : View.GONE);
+        if (m == MODE_PROFILE_OWNER) {
+            selectTab(1);
+        }
+    }
+
+    private void provisionProfile() {
+        try {
+            Intent i = new Intent(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE);
+            i.putExtra("android.app.extra.PROFILE_ADMIN_NAME", new ComponentName(this, AdminReceiver.class));
+            i.putExtra(DevicePolicyManager.EXTRA_PROVISIONING_SKIP_ENCRYPTION, true);
+            if (i.resolveActivity(getPackageManager()) == null) {
+                Toast.makeText(this, "This phone's wizard isn't available — use the LADB command below instead.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            ownerStatus.setText("Opening the official setup wizard… follow it, then reopen SwiftClone then the wizard finishes.");
+            startActivity(i);
+        } catch (Exception e) {
+            Toast.makeText(this, "Setup wizard blocked (" + e.getClass().getSimpleName()
+                    + ") — use the LADB command below instead.", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void refreshStatus() {
-        boolean owner = isOwner();
+        int m = mode();
         boolean usage = hasUsageAccess();
         boolean sec = checkSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
                 == PackageManager.PERMISSION_GRANTED;
-        ownerStatus.setText(owner
-                ? "Cloning powers: ACTIVE ✓  (Go to the Clone Space tab)"
-                : "Cloning powers: not yet granted — run the command below once from a computer (no root). Then reopen this app.");
-        ownerStatus.setTextColor(getColor(owner ? R.color.accent_green : R.color.text_secondary));
         usageStatus.setText(usage ? "Usage access: granted ✓" : "Usage access: not granted — tap below and allow SwiftClone.");
         usageStatus.setTextColor(getColor(usage ? R.color.accent_green : R.color.text_secondary));
         secStatus.setText(sec ? "Animation boost: unlocked ✓" : "Animation boost: not yet unlocked — optional, command below.");
         secStatus.setTextColor(getColor(sec ? R.color.accent_green : R.color.text_secondary));
-        refreshSpaceStatus(owner);
+
+        if (m == MODE_PROFILE_OWNER) {
+            ownerStatus.setText("✓ CLONING READY — no computer needed! This copy of SwiftClone is provisioned inside the clone space. Pick apps from your main profile in the Clone Space tab and duplicate them.");
+            ownerStatus.setTextColor(getColor(R.color.accent_green));
+            dpmCmd.setText("Setup complete — no further commands needed.");
+            spaceStatus.setText("Mode: inside the clone space. Select your apps and duplicate them.");
+            refreshSpaceStatus(true);
+        } else if (m == MODE_DEVICE_OWNER) {
+            ownerStatus.setText("Cloning powers: ACTIVE ✓  (Go to the Clone Space tab)");
+            ownerStatus.setTextColor(getColor(R.color.accent_green));
+            dpmCmd.setText("Setup complete — no further commands needed.");
+            refreshSpaceStatus(true);
+        } else {
+            ownerStatus.setText("Not set up yet. Try the one-tap wizard below first; if your phone blocks it, use the command with LADB/computer instead.");
+            ownerStatus.setTextColor(getColor(R.color.text_secondary));
+            dpmCmd.setText("adb shell dpm set-device-owner com.swiftclone.app/.AdminReceiver");
+            refreshSpaceStatus(false);
+        }
     }
 
-    private void refreshSpaceStatus(boolean owner) {
-        if (!owner) {
-            spaceStatus.setText("Status: waiting for cloning powers (Setup tab).");
-            return;
-        }
-        if (spaceUserId() >= 0) {
-            spaceStatus.setText("Status: active ✓ (" + clonedCount() + " apps duplicated so far)");
+    private void refreshSpaceStatus(boolean ready) {
+        int m = mode();
+        if (m == MODE_DEVICE_OWNER) {
+            if (spaceUserId() >= 0) {
+                spaceStatus.setText("Status: active ✓ (" + clonedCount() + " apps duplicated so far)");
+            } else {
+                spaceStatus.setText("Status: no clone space yet — tap 'Create space'.");
+            }
+        } else if (m == MODE_PROFILE_OWNER) {
+            spaceStatus.setText("Status: ready ✓ — apps already installed here: " + clonedCount());
         } else {
-            spaceStatus.setText("Status: no clone space yet — tap 'Create space'.");
+            spaceStatus.setText("Status: setup first (Setup tab).");
         }
     }
 
@@ -190,6 +252,20 @@ public class MainActivity extends Activity {
 
     private int clonedCount() {
         return prefs().getInt("cloned_count", 0);
+    }
+
+    private void bumpCount(int n) {
+        prefs().edit().putInt("cloned_count", clonedCount() + n).apply();
+    }
+
+    private int handleId(UserHandle uh) {
+        try {
+            Method m = UserHandle.class.getDeclaredMethod("getIdentifier");
+            m.setAccessible(true);
+            return (Integer) m.invoke(uh);
+        } catch (Exception e) {
+            return -10;
+        }
     }
 
     private UserHandle handleForId(int id) {
@@ -210,21 +286,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    private int handleId(UserHandle uh) {
-        try {
-            Method m = UserHandle.class.getDeclaredMethod("getIdentifier");
-            m.setAccessible(true);
-            return (Integer) m.invoke(uh);
-        } catch (Exception e) {
-            return -10;
-        }
-    }
-
     private void createSpace() {
         cloneStatus.setTextColor(getColor(R.color.text_secondary));
-        if (!isOwner()) {
+        if (mode() != MODE_DEVICE_OWNER) {
             cloneStatus.setTextColor(getColor(R.color.accent_amber));
-            cloneStatus.setText("Grant cloning powers first (Setup tab, one-time ADB command — no root needed).");
+            cloneStatus.setText("Finish setup first (Setup tab).");
             return;
         }
         try {
@@ -246,13 +312,13 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             cloneStatus.setTextColor(getColor(R.color.accent_amber));
             cloneStatus.setText("Your phone's system blocked profile creation (" + e.getClass().getSimpleName()
-                    + "). Some manufacturers restrict it — try after removing Google/work accounts, or on stock Android.");
+                    + "). Try removing accounts and rebooting, or factory-fresh state.");
         }
     }
 
     private void openSpace() {
         int id = spaceUserId();
-        if (!isOwner() || id < 0) {
+        if (mode() != MODE_DEVICE_OWNER || id < 0) {
             cloneStatus.setTextColor(getColor(R.color.accent_amber));
             cloneStatus.setText("No clone space yet — create it first.");
             return;
@@ -294,11 +360,18 @@ public class MainActivity extends Activity {
             cloneStatus.setText("Select at least one app first.");
             return;
         }
-        if (!isOwner() || spaceUserId() < 0) {
+        final int m = mode();
+        if (m == MODE_NONE) {
             cloneStatus.setTextColor(getColor(R.color.accent_amber));
-            cloneStatus.setText("Need cloning powers and a created space first (see Setup / Create space).");
+            cloneStatus.setText("Finish setup first (Setup tab — one-tap wizard, no computer needed).");
             return;
         }
+        if (m == MODE_DEVICE_OWNER && spaceUserId() < 0) {
+            cloneStatus.setTextColor(getColor(R.color.accent_amber));
+            cloneStatus.setText("Tap 'Create space' first.");
+            return;
+        }
+        final int targetUser = (m == MODE_DEVICE_OWNER) ? spaceUserId() : handleId(Process.myUserHandle());
         cloneStatus.setTextColor(getColor(R.color.text_secondary));
         cloneStatus.setText("Duplicating " + selection.size() + " app(s)…");
         new Thread(new Runnable() {
@@ -306,7 +379,7 @@ public class MainActivity extends Activity {
                 int ok = 0;
                 String firstError = null;
                 for (String pkg : selection) {
-                    int res = installForUser(pkg, spaceUserId());
+                    int res = installForUser(pkg, targetUser);
                     if (res == 0 || res == 1) ok++;
                     else if (firstError == null) firstError = "code " + res;
                     try { Thread.sleep(150); } catch (InterruptedException ignored) {}
@@ -315,11 +388,17 @@ public class MainActivity extends Activity {
                 final String fErr = firstError;
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        prefs().edit().putInt("cloned_count", prefs().getInt("cloned_count", 0) + fOk).apply();
+                        bumpCount(fOk);
                         refreshSpaceStatus(true);
                         cloneStatus.setTextColor(getColor(fOk > 0 ? R.color.accent_green : R.color.accent_amber));
-                        cloneStatus.setText("Duplicated " + fOk + "/" + selection.size() + " app(s). Open the space to use them."
-                                + (fErr != null ? "  (first failure: " + fErr + ")" : ""));
+                        if (mode() == MODE_PROFILE_OWNER) {
+                            cloneStatus.setText("Duplicated " + fOk + "/" + selection.size()
+                                    + " app(s) into this space ✓. Switch back to your main profile to add more.");
+                        } else {
+                            cloneStatus.setText("Duplicated " + fOk + "/" + selection.size()
+                                    + " app(s). Open the space to use them.");
+                        }
+                        if (fErr != null) cloneStatus.append("  (first failure: " + fErr + ")");
                     }
                 });
             }
@@ -387,8 +466,7 @@ public class MainActivity extends Activity {
         try {
             UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
             Method m = UsageStatsManager.class.getMethod("setAppStandbyBucket", String.class, int.class);
-            PackageManager pm = getPackageManager();
-            List<PackageInfo> all = pm.getInstalledPackages(0);
+            List<PackageInfo> all = getPackageManager().getInstalledPackages(0);
             for (PackageInfo pi : all) {
                 String pkg = pi.packageName;
                 if (pkg.equals(getPackageName()) || pkg.startsWith("com.android.") || pkg.startsWith("com.google.android.")) continue;
@@ -427,7 +505,7 @@ public class MainActivity extends Activity {
         AppOpsManager ops = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
         try {
             int mode = ops.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                    android.os.Process.myUid(), getPackageName());
+                    Process.myUid(), getPackageName());
             return mode == AppOpsManager.MODE_ALLOWED;
         } catch (Exception e) {
             return false;
@@ -438,40 +516,55 @@ public class MainActivity extends Activity {
         appList.removeAllViews();
         boxes.clear();
         pkgNames.clear();
-        pkgLabels.clear();
+
+        int m = mode();
         PackageManager pm = getPackageManager();
-        List<PackageInfo> installed = pm.getInstalledPackages(0);
-        List<PackageInfo> visible = new ArrayList<PackageInfo>();
+        List<String[]> rows = new ArrayList<String[]>();
         boolean showSys = showSystem.isChecked();
-        for (PackageInfo pi : installed) {
-            ApplicationInfo ai = pi.applicationInfo;
-            boolean system = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            if (system && !showSys) continue;
-            if ("com.swiftclone.app".equals(pi.packageName)) continue;
-            if (ai.labelRes == 0 && ai.packageName == null) continue;
-            visible.add(pi);
+
+        if (m == MODE_PROFILE_OWNER) {
+            try {
+                LauncherApps la = (LauncherApps) getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                UserHandle parent = null;
+                int myId = handleId(Process.myUserHandle());
+                for (UserHandle uh : ((UserManager) getSystemService(Context.USER_SERVICE)).getUserProfiles()) {
+                    if (handleId(uh) != myId) { parent = uh; break; }
+                }
+                if (parent == null) parent = Process.myUserHandle();
+                List<LauncherActivityInfo> acts = la.getActivityList(null, parent);
+                Set<String> seen = new HashSet<String>();
+                for (LauncherActivityInfo a : acts) {
+                    String pkg = a.getComponentName().getPackageName();
+                    if (!seen.add(pkg)) continue;
+                    rows.add(new String[]{String.valueOf(a.getLabel()), pkg});
+                }
+            } catch (Exception ignored) {}
+        } else {
+            List<PackageInfo> installed = pm.getInstalledPackages(0);
+            for (PackageInfo pi : installed) {
+                ApplicationInfo ai = pi.applicationInfo;
+                boolean system = (ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                if (system && !showSys) continue;
+                if ("com.swiftclone.app".equals(pi.packageName)) continue;
+                rows.add(new String[]{String.valueOf(ai.loadLabel(pm)), pi.packageName});
+            }
         }
-        Collections.sort(visible, new Comparator<PackageInfo>() {
-            @Override public int compare(PackageInfo a, PackageInfo b) {
-                String la = String.valueOf(a.applicationInfo.loadLabel(getPackageManager()));
-                String lb = String.valueOf(b.applicationInfo.loadLabel(getPackageManager()));
-                return la.compareToIgnoreCase(lb);
+
+        Collections.sort(rows, new Comparator<String[]>() {
+            @Override public int compare(String[] a, String[] b) {
+                return a[0].compareToIgnoreCase(b[0]);
             }
         });
         int pad = (int) (4 * getResources().getDisplayMetrics().density);
-        for (PackageInfo pi : visible) {
-            String label;
-            try { label = String.valueOf(pi.applicationInfo.loadLabel(pm)); }
-            catch (Exception e) { label = pi.packageName; }
+        for (String[] row : rows) {
             CheckBox box = new CheckBox(this);
-            box.setText(label + "\n" + pi.packageName);
+            box.setText(row[0] + "\n" + row[1]);
             box.setTextSize(14);
             box.setTextColor(getColor(R.color.text_primary));
             box.setPadding(pad, pad, pad, pad);
             appList.addView(box);
             boxes.add(box);
-            pkgNames.add(pi.packageName);
-            pkgLabels.add(label);
+            pkgNames.add(row[1]);
         }
     }
 
