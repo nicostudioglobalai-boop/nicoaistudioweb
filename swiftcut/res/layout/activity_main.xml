@@ -60,6 +60,41 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp">
 
+            <TextView style="@style/CardTitle" android:text="PREVIEW + TIMELINE" />
+
+            <VideoView
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginBottom="8dp" />
+
+            <com.swiftcut.app.TimelineView
+                android:id="@+id/timeline"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnPlay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_outline"
+                android:text="PLAY / PAUSE PREVIEW"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Drag the pink handles on the strip to trim. Tap anywhere to move the playhead."
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/Card"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp">
+
             <TextView style="@style/CardTitle" android:text="2. TRIM (no quality loss)" />
 
             <TextView

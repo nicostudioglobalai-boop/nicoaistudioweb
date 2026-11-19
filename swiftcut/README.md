@@ -1,4 +1,6 @@
-# SwiftCut — video editor for low-RAM phones (v1.0)
+# SwiftCut — video editor for low-RAM phones (v1.1)
+
+**v1.1 — new: visual timeline + preview.** CapCut-style filmstrip: thumbnails of your video, pink handles you drag to trim, playhead you tap to scrub, and an in-app video preview with play/pause.
 
 An original, CapCut-style video editor built from scratch for the itel A50 / Android 14 Go (2GB RAM) class of phones. No root, no setup, no account.
 

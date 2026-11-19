@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +45,10 @@ public class MainActivity extends Activity {
     private TextView info, range, status;
     private SeekBar seekStart, seekEnd;
     private ProgressBar progress;
+    private VideoView preview;
+    private TimelineView timeline;
+    private Button btnPlay;
+    private boolean tlGuard;
     private final Handler ui = new Handler();
     private final ExecutorService pool = Executors.newSingleThreadExecutor();
     private volatile boolean busy;
@@ -58,6 +63,9 @@ public class MainActivity extends Activity {
         Button btnAudio = findViewById(R.id.btnAudio);
         Button btnHighlight = findViewById(R.id.btnHighlight);
         Button btnCompress = findViewById(R.id.btnCompress);
+        preview = findViewById(R.id.preview);
+        timeline = findViewById(R.id.timeline);
+        btnPlay = findViewById(R.id.btnPlay);
         info = findViewById(R.id.info);
         range = findViewById(R.id.range);
         status = findViewById(R.id.status);
@@ -138,8 +146,28 @@ public class MainActivity extends Activity {
             return true;
         }));
 
-        seekStart.setOnSeekBarChangeListener(bar(this::updateRange));
-        seekEnd.setOnSeekBarChangeListener(bar(this::updateRange));
+        btnPlay.setOnClickListener(v -> togglePlay());
+
+        timeline.setListener(new TimelineView.Listener() {
+            @Override
+            public void onRangeChanged(long s, long e) {
+                tlGuard = true;
+                seekStart.setProgress((int) s);
+                seekEnd.setProgress((int) e);
+                tlGuard = false;
+                updateRange();
+            }
+
+            @Override
+            public void onPlayheadChanged(long p) {
+                if (preview != null && !preview.isPlaying()) {
+                    preview.seekTo((int) p);
+                }
+            }
+        });
+
+        seekStart.setOnSeekBarChangeListener(bar(this::onSliderMoved));
+        seekEnd.setOnSeekBarChangeListener(bar(this::onSliderMoved));
         updateRange();
     }
 
@@ -256,6 +284,49 @@ public class MainActivity extends Activity {
         return stem + "_" + tag + (audio ? ".m4a" : ".mp4");
     }
 
+    private void onSliderMoved() {
+        long a = seekStart.getProgress();
+        long b = seekEnd.getProgress();
+        updateRange();
+        if (!tlGuard) timeline.setRange(a, b);
+    }
+
+    private void togglePlay() {
+        if (videoUri == null) {
+            toast("Pick a video first");
+            return;
+        }
+        if (preview.isPlaying()) {
+            preview.pause();
+            btnPlay.setText("PLAY / PAUSE PREVIEW");
+            return;
+        }
+        long pos = preview.getCurrentPosition();
+        long a = seekStart.getProgress();
+        long e = seekEnd.getProgress();
+        if (pos < a || pos >= e) preview.seekTo((int) a);
+        preview.start();
+        btnPlay.setText("PAUSE");
+        ui.post(playTick);
+    }
+
+    private final Runnable playTick = new Runnable() {
+        @Override
+        public void run() {
+            if (preview == null || !preview.isPlaying()) return;
+            long pos = preview.getCurrentPosition();
+            long e = seekEnd.getProgress();
+            timeline.setPlayhead(pos);
+            if (pos >= e) {
+                preview.pause();
+                preview.seekTo(seekStart.getProgress());
+                btnPlay.setText("PLAY / PAUSE PREVIEW");
+                return;
+            }
+            ui.postDelayed(this, 100);
+        }
+    };
+
     private String fmtMs(long ms) {
         return String.format(Locale.US, "%d:%02d", ms / 60000, ms % 60000 / 1000);
     }
@@ -324,6 +395,12 @@ public class MainActivity extends Activity {
             seekStart.setProgress(0);
             seekEnd.setProgress((int) durationMs);
             updateRange();
+            timeline.setDuration(durationMs);
+            timeline.setRange(0, durationMs);
+            timeline.setPlayhead(0);
+            preview.stopPlayback();
+            preview.setVideoURI(videoUri);
+            preview.seekTo(0);
         } catch (Exception ex) {
             setStatus("Could not read this file: " + ex.getMessage());
         }
