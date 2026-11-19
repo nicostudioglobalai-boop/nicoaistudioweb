@@ -59,8 +59,8 @@ fi
 java -jar "$BT/lib/apksigner.jar" sign \
   --ks "$KS" --ks-key-alias swiftclone \
   --ks-pass pass:swiftclone123 --key-pass pass:swiftclone123 \
-  --out "$PROJ/SwiftClone-v1.1.apk" "$OUT/aligned.apk"
+  --out "$PROJ/SwiftClone-v1.2.apk" "$OUT/aligned.apk"
 
 echo "verify:"
-java -jar "$BT/lib/apksigner.jar" verify --print-certs "$PROJ/SwiftClone-v1.1.apk" | head -2
-ls -la "$PROJ/SwiftClone-v1.1.apk"
+java -jar "$BT/lib/apksigner.jar" verify --print-certs "$PROJ/SwiftClone-v1.2.apk" | head -2
+ls -la "$PROJ/SwiftClone-v1.2.apk"

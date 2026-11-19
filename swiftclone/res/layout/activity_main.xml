@@ -170,6 +170,20 @@
                 </LinearLayout>
 
                 <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:text="Second-phone identity (separate IP)" />
+                    <TextView android:id="@+id/vpnStatus"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Gives this clone space its own internet identity: duplicate a VPN app into the space, sign in inside it, then enforce it Always-On — apps in the space will then appear online from a different IP, while your main phone keeps its normal IP."
+                        android:textColor="@color/text_secondary" android:textSize="13sp" />
+                    <Button android:id="@+id/btnVpn"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="SET SEPARATE IP (ALWAYS-ON VPN)" android:textColor="@color/bg"
+                        android:background="@drawable/btn_accent" android:textAllCaps="false"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
                     <TextView style="@style/CardTitle" android:text="Pick apps to duplicate" />
                     <CheckBox android:id="@+id/showSystem"
                         android:layout_width="wrap_content" android:layout_height="wrap_content"

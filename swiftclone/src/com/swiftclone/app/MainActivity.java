@@ -2,6 +2,7 @@ package com.swiftclone.app;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStats;
@@ -11,13 +12,16 @@ import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
+import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
@@ -49,10 +53,10 @@ public class MainActivity extends Activity {
 
     private TextView ownerStatus, secStatus, usageStatus;
     private TextView dpmCmd, secCmd;
-    private TextView spaceStatus, cloneStatus, fastStatus, animCurrent;
+    private TextView spaceStatus, cloneStatus, fastStatus, animCurrent, vpnStatus;
     private CheckBox showSystem;
     private LinearLayout appList;
-    private Button btnCreateSpace, btnOpenSpace, btnProvision;
+    private Button btnCreateSpace, btnOpenSpace, btnProvision, btnVpn;
 
     private final List<String> pkgNames = new ArrayList<String>();
     private final List<CheckBox> boxes = new ArrayList<CheckBox>();
@@ -101,6 +105,11 @@ public class MainActivity extends Activity {
         btnProvision = (Button) findViewById(R.id.btnProvision);
         btnProvision.setOnClickListener(new OnClickListener() {
             @Override public void onClick(View v) { provisionProfile(); }
+        });
+        vpnStatus = (TextView) findViewById(R.id.vpnStatus);
+        btnVpn = (Button) findViewById(R.id.btnVpn);
+        btnVpn.setOnClickListener(new OnClickListener() {
+            @Override public void onClick(View v) { chooseSeparateIp(); }
         });
 
         showSystem.setOnClickListener(new OnClickListener() {
@@ -176,9 +185,69 @@ public class MainActivity extends Activity {
         int m = mode();
         btnCreateSpace.setVisibility(m == MODE_DEVICE_OWNER ? View.VISIBLE : View.GONE);
         btnOpenSpace.setVisibility(m == MODE_DEVICE_OWNER ? View.VISIBLE : View.GONE);
+        btnVpn.setVisibility(m == MODE_PROFILE_OWNER ? View.VISIBLE : View.GONE);
         if (m == MODE_PROFILE_OWNER) {
             selectTab(1);
+            refreshVpnStatus();
         }
+    }
+
+    private void refreshVpnStatus() {
+        try {
+            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+            String current = dpm.getAlwaysOnVpnPackage(new ComponentName(this, AdminReceiver.class));
+            if (current != null) {
+                vpnStatus.setText("SEPARATE IP ACTIVE ✓ — this space's apps connect through: " + current + "\nYour main phone keeps its normal IP.");
+                btnVpn.setText("CHANGE VPN");
+            } else {
+                vpnStatus.setText("Not set yet. First: install a VPN app on your main phone (e.g. WireGuard or any free VPN), duplicate it below, open the cloned copy and sign in, then tap the button.");
+                btnVpn.setText("SET SEPARATE IP (ALWAYS-ON VPN)");
+            }
+        } catch (Exception e) {
+            vpnStatus.setText("VPN control unavailable on this system — apps can still use a VPN manually inside the space.");
+        }
+    }
+
+    private void chooseSeparateIp() {
+        PackageManager pm = getPackageManager();
+        List<ResolveInfo> vpns;
+        try {
+            vpns = pm.queryIntentServices(new Intent(VpnService.SERVICE_INTERFACE), 0);
+        } catch (Exception e) {
+            vpns = null;
+        }
+        if (vpns == null || vpns.isEmpty()) {
+            Toast.makeText(this, "No VPN app in this space yet — install one on your main phone, duplicate it below (tick it), open the cloned copy and sign in first.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        final int n = vpns.size();
+        final String[] names = new String[n];
+        final String[] pkgs = new String[n];
+        for (int i = 0; i < n; i++) {
+            ResolveInfo ri = vpns.get(i);
+            pkgs[i] = ri.serviceInfo.packageName;
+            try {
+                names[i] = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(pkgs[i], 0))) + "  (" + pkgs[i] + ")";
+            } catch (Exception e) {
+                names[i] = pkgs[i];
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Which VPN gives this space its IP?")
+                .setItems(names, new DialogInterface.OnClickListener() {
+                    @Override public void onClick(DialogInterface d, int which) {
+                        try {
+                            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+                            dpm.setAlwaysOnVpnPackage(new ComponentName(MainActivity.this, AdminReceiver.class), pkgs[which], true);
+                            Toast.makeText(MainActivity.this, "Always-on VPN set ✓ — apps in the space now use it for every connection.", Toast.LENGTH_LONG).show();
+                            refreshVpnStatus();
+                        } catch (Exception e) {
+                            Toast.makeText(MainActivity.this, "System refused (" + e.getClass().getSimpleName() + ")", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void provisionProfile() {
