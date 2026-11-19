@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SwiftClone</string>
+    <string name="tab_setup">Setup</string>
+    <string name="tab_space">Clone Space</string>
+    <string name="tab_fast">Fast Mode</string>
+</resources>
